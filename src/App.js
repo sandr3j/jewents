@@ -8,38 +8,53 @@ import "./App.css";
  */
 
 export default function App() {
-  return (
-    <div className="app min-h-screen text-blue-200 flex items-center flex-col p-20">
-      <div className="mb-10 grid grid-cols-4 grid-rows-2 w-1/2 mx-auto">
-        <img className="opacity-25" src={logo} alt="React Logo" width="300" />
-        <img
-          className="col-span-2 row-span-3 animate-spin m-auto"
-          style={{ animationDuration: "30s" }}
-          src={logo}
-          alt="React Logo"
-          width="300"
-        />
-        <img className="opacity-25" src={logo} alt="React Logo" width="300" />
-        <img className="opacity-25" src={logo} alt="React Logo" width="300" />
-        <img className="opacity-25" src={logo} alt="React Logo" width="300" />
-      </div>
-
-      <h1 className="text-2xl lg:text-5xl mb-10 text-right">
-        Welcome to Your New React App{" "}
-        <span className="block text-lg text-blue-400">on DigitalOcean</span>
-      </h1>
-
-      <div className="grid grid-cols-2 grid-rows-2 gap-4">
-        <Button
-          text="DigitalOcean Docs"
-          url="https://www.digitalocean.com/docs/app-platform"
-        />
-        <Button
-          text="DigitalOcean Dashboard"
-          url="https://cloud.digitalocean.com/apps"
-        />
-      </div>
+  return (<header>
+    <img id="feedIcon" src="" alt="feed icon"/>
+    <div>
+      <h1 id="feedTitle">Feed</h1>
+      <p id="feedDesc">JSON Feed viewer</p>
     </div>
+
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search title / text" />
+      <select id="sort">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+      </select>
+      <button id="downloadJson">Download JSON</button>
+    </div>
+  </header>
+
+  <main>
+    <aside class="sidebar">
+      <div class="feed-meta">
+        <img id="feedBanner" src="" alt="banner">
+        <div>
+          <strong id="feedHome">home</strong>
+          <div id="feedUrl" style="font-size:12px;color:var(--muted)"></div>
+        </div>
+      </div>
+
+      <h2>Items</h2>
+      <div class="item-list" id="itemList"></div>
+    </aside>
+
+    <section class="viewer" id="viewer">
+      <div class="banner" id="viewerBanner">no preview</div>
+      <div class="content">
+        <div class="meta-row"><strong id="itemTitle">Select an item</strong><div style="flex:1"></div><div id="itemDate"></div></div>
+        <div class="meta-row" style="margin-top:8px"><span id="itemExcerpt" style="color:var(--muted)"></span></div>
+        <div class="attachments" id="attachments"></div>
+        <div class="body" id="itemBody" style="margin-top:12px"></div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button id="openOriginal">Open original</button>
+          <button id="copyLink">Copy link</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Viewer generated locally · Locale: de-DE</footer>
   );
 }
 
