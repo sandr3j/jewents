@@ -4,5 +4,5 @@ services:
   github:
     branch: main
     deploy_on_push: true
-    repo: digitalocean/sample-react
+    repo: sandr3j/jewents
   name: sample-react
