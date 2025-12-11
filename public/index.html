@@ -5,309 +5,906 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>JSON Feed Viewer</title>
+  <title>Jewents</title>
 
   <style>
-    :root{--bg:#0f1724;--card:#0b1320;--muted:#9aa4b2;--accent:#7dd3fc}
-    *{box-sizing:border-box}
-    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; background:linear-gradient(180deg,#071126 0%, #071826 100%); color:#e6eef6}
-    header{display:flex;align-items:center;gap:16px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.03)}
-    header img{width:44px;height:44px;border-radius:8px;object-fit:cover}
-    header h1{font-size:18px;margin:0}
-    header p{margin:0;color:var(--muted);font-size:13px}
-    .controls{display:flex;gap:8px;align-items:center;margin-left:auto}
-    .controls input[type=search]{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    .controls select,.controls button{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    main{display:grid;grid-template-columns:360px 1fr;gap:20px;padding:20px}
-    .sidebar{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:14px;border-radius:12px;min-height:400px}
-    .sidebar h2{font-size:14px;margin:0 0 10px 0}
-    .feed-meta{display:flex;gap:10px;align-items:center}
-    .feed-meta img{width:56px;height:56px;border-radius:8px;object-fit:cover}
-    .item-list{margin-top:12px;display:flex;flex-direction:column;gap:10px;max-height:64vh;overflow:auto;padding-right:6px}
-    .item-card{display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:10px;background:rgba(255,255,255,0.01);cursor:pointer}
-    .item-card img{width:72px;height:72px;border-radius:6px;object-fit:cover;flex-shrink:0}
-    .item-card .meta{flex:1}
-    .item-card .meta h3{margin:0;font-size:13px}
-    .item-card .meta p{margin:4px 0 0 0;color:var(--muted);font-size:12px}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+      background: #0a0e1a;
+      color: #e8edf4;
+      line-height: 1.6;
+    }
 
-    .viewer{padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));min-height:60vh}
-    .viewer .banner{width:100%;height:320px;border-radius:10px;overflow:hidden;background:#031026;display:flex;align-items:center;justify-content:center}
-    .viewer .banner img{width:100%;height:100%;object-fit:cover}
-    .viewer .content{margin-top:14px}
-    .viewer h2{margin:10px 0}
-    .meta-row{display:flex;gap:12px;align-items:center;color:var(--muted);font-size:13px}
-    .attachments{display:flex;gap:8px;margin-top:10px}
-    .attachments img{width:120px;height:80px;object-fit:cover;border-radius:8px}
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 20px 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
 
-    footer{padding:14px 20px;color:var(--muted);font-size:13px}
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
 
-    /* small screens */
-    @media (max-width:900px){main{grid-template-columns:1fr;}
-      .sidebar{order:2}
-      .viewer{order:1}
-      .viewer .banner{height:220px}}
+    .feed-branding {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 0 0 auto;
+    }
+
+    #feedIcon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .feed-info h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: #fff;
+    }
+
+    .feed-info p {
+      font-size: 13px;
+      color: #8b92a8;
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    #search {
+      width: 280px;
+      padding: 10px 16px 10px 40px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    #search:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(124, 211, 252, 0.4);
+      box-shadow: 0 0 0 3px rgba(124, 211, 252, 0.1);
+    }
+
+    #search::placeholder {
+      color: #6b7280;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+      pointer-events: none;
+    }
+
+    select, button {
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    select:hover, button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #downloadJson {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+    }
+
+    #downloadJson:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px;
+      min-height: calc(100vh - 200px);
+    }
+
+    /* List View */
+    .list-view {
+      display: block;
+    }
+
+    .list-view.hidden {
+      display: none;
+    }
+
+    .feed-stats {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+    }
+
+    .stat-item {
+      flex: 1;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #7dd3fc;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #8b92a8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .item-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+      border-color: rgba(124, 211, 252, 0.3);
+    }
+
+    .item-card-image {
+      width: 100%;
+      height: auto;
+      min-height: 200px;
+      object-fit: contain;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      padding: 12px;
+    }
+
+    .item-card-content {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .item-card-excerpt {
+      font-size: 14px;
+      color: #8b92a8;
+      line-height: 1.6;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .item-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .item-card-date::before {
+      content: '📅 ';
+    }
+
+    /* Detail View */
+    .detail-view {
+      display: none;
+    }
+
+    .detail-view.active {
+      display: block;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: #7dd3fc;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 24px;
+    }
+
+    .back-button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(124, 211, 252, 0.3);
+      transform: translateX(-4px);
+    }
+
+    .back-button::before {
+      content: '←';
+      font-size: 18px;
+    }
+
+    .detail-container {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .detail-banner {
+      width: 100%;
+      height: auto;
+      min-height: 400px;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      padding: 24px;
+    }
+
+    .detail-banner img {
+      width: 100%;
+      height: auto;
+      max-height: 800px;
+      object-fit: contain;
+    }
+
+    .detail-content {
+      padding: 48px;
+    }
+
+    .detail-header {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .detail-title {
+      font-size: 36px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+
+    .detail-meta {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      font-size: 14px;
+      color: #8b92a8;
+    }
+
+    .detail-date::before {
+      content: '📅 ';
+    }
+
+    .detail-excerpt {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #9ca3af;
+      padding: 24px;
+      background: rgba(124, 211, 252, 0.05);
+      border-left: 4px solid rgba(124, 211, 252, 0.5);
+      border-radius: 8px;
+      margin-bottom: 32px;
+    }
+
+    .detail-attachments {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .detail-attachments img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: transform 0.2s;
+    }
+
+    .detail-attachments img:hover {
+      transform: scale(1.05);
+    }
+
+    .detail-body {
+      font-size: 17px;
+      line-height: 1.9;
+      color: #d1d5db;
+      margin-bottom: 40px;
+    }
+
+    .detail-body p {
+      margin-bottom: 20px;
+    }
+
+    .detail-body a {
+      color: #7dd3fc;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(124, 211, 252, 0.3);
+      transition: border-color 0.2s;
+    }
+
+    .detail-body a:hover {
+      border-bottom-color: #7dd3fc;
+    }
+
+    .detail-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      margin: 24px 0;
+    }
+
+    .detail-body h2 {
+      font-size: 24px;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    .detail-body h3 {
+      font-size: 20px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .detail-body ul, .detail-body ol {
+      margin-left: 24px;
+      margin-bottom: 20px;
+    }
+
+    .detail-body li {
+      margin-bottom: 8px;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 16px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .detail-actions button {
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    #openOriginal {
+      background: linear-gradient(135deg, #7dd3fc 0%, #3b82f6 100%);
+      border: none;
+      color: #0a0e1a;
+    }
+
+    #openOriginal:hover {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 6px 16px rgba(124, 211, 252, 0.4);
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      color: #6b7280;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 16px 20px;
+      }
+
+      .header-content {
+        flex-wrap: wrap;
+      }
+
+      .header-actions {
+        width: 100%;
+        margin-top: 12px;
+      }
+
+      #search {
+        width: 100%;
+        flex: 1;
+      }
+
+      main {
+        padding: 20px;
+      }
+
+      .item-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-content {
+        padding: 24px 20px;
+      }
+
+      .detail-title {
+        font-size: 28px;
+      }
+
+      .detail-banner {
+        min-height: 300px;
+        max-height: 600px;
+        padding: 16px;
+      }
+
+      .detail-banner img {
+        max-height: 600px;
+      }
+
+      .detail-actions {
+        flex-direction: column;
+      }
+
+      .detail-actions button {
+        width: 100%;
+      }
+
+      .feed-stats {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
   </style>
 
   
 </head>
 <body>
   <header>
-    <img id="feedIcon" src="" alt="feed icon"/>
-    <div>
-      <h1 id="feedTitle">Feed</h1>
-      <p id="feedDesc">JSON Feed viewer</p>
-    </div>
+    <div class="header-content">
+      <div class="feed-branding">
+        <img id="feedIcon" src="" alt="Feed icon" />
+        <div class="feed-info">
+          <h1 id="feedTitle">Loading feed...</h1>
+          <p id="feedDesc">Please wait</p>
+        </div>
+      </div>
 
-    <div class="controls">
-      <input id="search" type="search" placeholder="Search title / text" />
-      <select id="sort">
-        <option value="newest">Newest first</option>
-        <option value="oldest">Oldest first</option>
-      </select>
-      <button id="downloadJson">Download JSON</button>
+      <div class="header-actions">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input id="search" type="search" placeholder="Search items..." />
+        </div>
+        <select id="sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+        </select>
+        <button id="downloadJson">Download JSON</button>
+      </div>
     </div>
   </header>
 
   <main>
-    <aside class="sidebar">
-      <div class="feed-meta">
-        <img id="feedBanner" src="" alt="banner">
-        <div>
-          <strong id="feedHome">home</strong>
-          <div id="feedUrl" style="font-size:12px;color:var(--muted)"></div>
+    <!-- List View -->
+    <div class="list-view" id="listView">
+      <div class="feed-stats">
+        <div class="stat-item">
+          <span class="stat-value" id="totalItems">0</span>
+          <span class="stat-label">Total Items</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="visibleItems">0</span>
+          <span class="stat-label">Showing</span>
         </div>
       </div>
 
-      <h2>Items</h2>
-      <div class="item-list" id="itemList"></div>
-    </aside>
-
-    <section class="viewer" id="viewer">
-      <div class="banner" id="viewerBanner">no preview</div>
-      <div class="content">
-        <div class="meta-row"><strong id="itemTitle">Select an item</strong><div style="flex:1"></div><div id="itemDate"></div></div>
-        <div class="meta-row" style="margin-top:8px"><span id="itemExcerpt" style="color:var(--muted)"></span></div>
-        <div class="attachments" id="attachments"></div>
-        <div class="body" id="itemBody" style="margin-top:12px"></div>
-        <div style="margin-top:14px;display:flex;gap:8px">
-          <button id="openOriginal">Open original</button>
-          <button id="copyLink">Copy link</button>
+      <div class="item-grid" id="itemGrid">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+          <p>Loading items...</p>
         </div>
       </div>
-    </section>
+    </div>
+
+    <!-- Detail View -->
+    <div class="detail-view" id="detailView">
+      <button class="back-button" id="backButton">Back to list</button>
+      
+      <div class="detail-container">
+        <div class="detail-banner" id="detailBanner">
+          <span>No preview available</span>
+        </div>
+        
+        <div class="detail-content">
+          <div class="detail-header">
+            <h1 class="detail-title" id="detailTitle">Article Title</h1>
+            <div class="detail-meta">
+              <span class="detail-date" id="detailDate"></span>
+            </div>
+          </div>
+
+          <div class="detail-excerpt" id="detailExcerpt"></div>
+          <div class="detail-attachments" id="detailAttachments"></div>
+          <div class="detail-body" id="detailBody"></div>
+
+          <div class="detail-actions">
+            <button id="openOriginal">Open Original</button>
+            <button id="copyLink">Copy Link</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <footer>Viewer generated locally · Locale: de-DE</footer>
+  <footer>
+    Viewer generated locally · Locale: de-DE · Made with care
+  </footer>
 
   <script>
-    let $div_ = document.querySelector('div');
+    let FEED = null;
+    let currentItems = [];
+    let currentItem = null;
 
-/**
- * Get JSON data from an URL
- */
-let getJSON = url => {
-  return new Promise((resolve, reject) => {
-    let xhr = new XMLHttpRequest();
-    xhr.open('get', url, true);
-    xhr.responseType = 'json';
-    xhr.onload = () => {
-      if (xhr.status === 200) resolve(xhr.response);
-      else reject(xhr.status);
+    // Utilities
+    const $ = (sel) => document.querySelector(sel);
+
+    const formatDate = (iso) => {
+      try {
+        const d = new Date(iso);
+        return new Intl.DateTimeFormat('de-DE', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }).format(d);
+      } catch (e) {
+        return iso;
+      }
     };
-    xhr.send();
-  });
-};
 
-var FEED = "";
+    // Fetch JSON feed
+    const getJSON = (url) => {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'json';
+        xhr.onload = () => {
+          if (xhr.status === 200) resolve(xhr.response);
+          else reject(xhr.status);
+        };
+        xhr.onerror = () => reject('Network error');
+        xhr.send();
+      });
+    };
 
-// ---------------- LOAD FEED FIRST ----------------
-getJSON('https://jewents.pages.dev/json/')
-  .then(data => {
-    FEED = data;
-    initFeed();  // ← start everything AFTER feed loads
-  })
-  .catch(status => {
-    console.error('Error:', status);
-  });
+    // Sanitize HTML
+    const sanitizeHTML = (html) => {
+      html = html.replace(/<(script|style)[\s\S]*?>[\s\S]*?<\/\1>/gi, '');
+      html = html.replace(/\son[a-zA-Z]+="[\s\S]*?"/gi, '');
+      html = html.replace(/\son[a-zA-Z]+='[\s\S]*?'/gi, '');
+      html = html.replace(/href="javascript:[^"]*"/gi, 'href="#"');
+      return html;
+    };
 
-// --- Utils ---
-const $ = sel => document.querySelector(sel);
-const formatDate = (iso) => {
-  try {
-    const d = new Date(iso);
-    return new Intl.DateTimeFormat('de-DE', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    }).format(d);
-  } catch (e) { return iso }
-}
+    // Render feed metadata
+    const renderFeedMeta = (feed) => {
+      $('#feedTitle').textContent = feed.title || 'Untitled Feed';
+      $('#feedDesc').textContent = feed.description || feed.language || 'No description';
+      
+      const iconUrl = feed.icon || feed.favicon || '';
+      if (iconUrl) {
+        $('#feedIcon').src = iconUrl;
+      }
+    };
 
-// --- Render feed meta ---
-function renderFeedMeta(feed) {
-  $('#feedTitle').textContent = feed.title || 'Untitled feed';
-  $('#feedDesc').textContent = feed.description || feed.language || '';
-  $('#feedIcon').src = feed.icon || feed.favicon || '';
-  $('#feedBanner').src = feed.icon || '';
-  $('#feedHome').textContent = feed.home_page_url || '';
-  $('#feedUrl').textContent = feed.feed_url || '';
-}
+    // Create item card
+    const makeItemCard = (item) => {
+      const card = document.createElement('div');
+      card.className = 'item-card';
 
-// --- Item list & viewer ---
-let currentItems = [];
+      const img = document.createElement('img');
+      img.className = 'item-card-image';
+      img.src = item.banner_image || 
+        (item.attachments?.[0]?.url) || 
+        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect fill="%231e293b" width="100" height="100"/%3E%3C/svg%3E';
+      img.alt = item.title || 'No title';
 
-function makeItemCard(item) {
-  const el = document.createElement('div');
-  el.className = 'item-card';
+      const content = document.createElement('div');
+      content.className = 'item-card-content';
 
-  const thumb = document.createElement('img');
-  thumb.src = item.banner_image ||
-    (item.attachments && item.attachments[0] && item.attachments[0].url) || '';
-  thumb.alt = item.title || '';
+      const title = document.createElement('h3');
+      title.className = 'item-card-title';
+      title.textContent = item.title || '(No title)';
 
-  const meta = document.createElement('div');
-  meta.className = 'meta';
+      const excerpt = document.createElement('p');
+      excerpt.className = 'item-card-excerpt';
+      excerpt.textContent = (item.content_text || '').split('\n').slice(0, 3).join(' ').trim() || 'No excerpt available';
 
-  const h3 = document.createElement('h3');
-  h3.textContent = item.title || '(no title)';
+      const footer = document.createElement('div');
+      footer.className = 'item-card-footer';
 
-  const p = document.createElement('p');
-  p.textContent = item._microfeed && item._microfeed.date_published_short
-    ? item._microfeed.date_published_short
-    : (item.date_published ? formatDate(item.date_published) : '');
+      const date = document.createElement('span');
+      date.className = 'item-card-date';
+      date.textContent = item.date_published ? formatDate(item.date_published) : 'No date';
 
-  meta.appendChild(h3);
-  meta.appendChild(p);
+      footer.appendChild(date);
 
-  el.appendChild(thumb);
-  el.appendChild(meta);
-  el.addEventListener('click', () => openItem(item));
+      content.appendChild(title);
+      content.appendChild(excerpt);
+      content.appendChild(footer);
 
-  return el;
-}
+      card.appendChild(img);
+      card.appendChild(content);
 
-function renderList(items) {
-  const list = $('#itemList');
-  list.innerHTML = '';
-  if (!items.length) {
-    list.textContent = 'No items';
-    return;
-  }
-  items.forEach(it => list.appendChild(makeItemCard(it)));
-}
+      card.addEventListener('click', () => showDetail(item));
 
-function openItem(item) {
-  $('#itemTitle').textContent = item.title || '(no title)';
-  $('#itemDate').textContent = item.date_published ? formatDate(item.date_published) : '';
-  $('#itemExcerpt').textContent = (item.content_text || '').split('\n').slice(0, 3).join(' ') || '';
+      return card;
+    };
 
-  // banner
-  const bannerContainer = $('#viewerBanner');
-  bannerContainer.innerHTML = '';
-  const bannerUrl = item.banner_image ||
-    (item.attachments && item.attachments[0] && item.attachments[0].url) || '';
+    // Render item grid
+    const renderGrid = (items) => {
+      const grid = $('#itemGrid');
+      grid.innerHTML = '';
 
-  if (bannerUrl) {
-    const img = document.createElement('img');
-    img.src = bannerUrl;
-    img.alt = item.title || '';
-    bannerContainer.appendChild(img);
-  } else {
-    bannerContainer.textContent = 'no preview';
-  }
+      $('#totalItems').textContent = FEED?.items?.length || 0;
+      $('#visibleItems').textContent = items.length;
 
-  // attachments
-  const at = $('#attachments');
-  at.innerHTML = '';
-  const attachments = item.attachments || [];
-  attachments.forEach(a => {
-    const i = document.createElement('img');
-    i.src = a.url;
-    i.title = a.mime_type || '';
-    at.appendChild(i);
-  });
+      if (!items.length) {
+        grid.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>No items found</p></div>';
+        return;
+      }
 
-  // body
-  const body = $('#itemBody');
-  if (item.content_html) {
-    body.innerHTML = sanitizeHTML(item.content_html);
-  } else {
-    body.textContent = item.content_text || '';
-  }
+      items.forEach(item => {
+        grid.appendChild(makeItemCard(item));
+      });
+    };
 
-  // actions
-  $('#openOriginal').onclick = () => {
-    window.open(item._microfeed?.web_url || item.url || '#', '_blank');
-  };
+    // Show detail view
+    const showDetail = (item) => {
+      currentItem = item;
 
-  $('#copyLink').onclick = async () => {
-    const link = item._microfeed?.web_url || item.url || '';
-    try {
-      await navigator.clipboard.writeText(link);
-      alert('Link copied');
-    } catch (e) {
-      prompt('Copy link', link);
-    }
-  };
-}
+      // Hide list, show detail
+      $('#listView').classList.add('hidden');
+      $('#detailView').classList.add('active');
 
-// --- Sanitizer ---
-function sanitizeHTML(html) {
-  html = html.replace(/<(script|style)[\s\S]*?>[\s\S]*?<\/\1>/gi, '');
-  html = html.replace(/\son[a-zA-Z]+=\"[\s\S]*?\"/gi, '');
-  html = html.replace(/\son[a-zA-Z]+='[\s\S]*?'/gi, '');
-  html = html.replace(/href=\"javascript:[^\"]*\"/gi, 'href="#"');
-  return html;
-}
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
-// --- Search & sort ---
-$('#search').addEventListener('input', () => applyFilters());
-$('#sort').addEventListener('change', () => applyFilters());
+      // Update banner
+      const banner = $('#detailBanner');
+      const bannerUrl = item.banner_image || item.attachments?.[0]?.url || '';
+      
+      if (bannerUrl) {
+        banner.innerHTML = `<img src="${bannerUrl}" alt="${item.title || ''}" />`;
+      } else {
+        banner.innerHTML = '<span>No preview available</span>';
+      }
 
-function applyFilters() {
-  const q = $('#search').value.trim().toLowerCase();
-  const sort = $('#sort').value;
+      // Update content
+      $('#detailTitle').textContent = item.title || '(No title)';
+      $('#detailDate').textContent = item.date_published ? formatDate(item.date_published) : '';
 
-  let items = FEED.items ? [...FEED.items] : [];
+      // Excerpt
+      const excerpt = (item.content_text || '').split('\n').slice(0, 3).join(' ').trim();
+      const excerptEl = $('#detailExcerpt');
+      if (excerpt) {
+        excerptEl.textContent = excerpt;
+        excerptEl.style.display = 'block';
+      } else {
+        excerptEl.style.display = 'none';
+      }
 
-  if (q) {
-    items = items.filter(it =>
-      (it.title || '').toLowerCase().includes(q) ||
-      (it.content_text || '').toLowerCase().includes(q)
-    );
-  }
+      // Attachments
+      const attachments = $('#detailAttachments');
+      attachments.innerHTML = '';
+      (item.attachments || []).forEach(att => {
+        const img = document.createElement('img');
+        img.src = att.url;
+        img.title = att.mime_type || '';
+        img.alt = item.title || '';
+        attachments.appendChild(img);
+      });
 
-  items.sort((a, b) => {
-    const ta = new Date(a.date_published || 0).getTime();
-    const tb = new Date(b.date_published || 0).getTime();
-    return sort === 'newest' ? tb - ta : ta - tb;
-  });
+      // Body
+      const body = $('#detailBody');
+      if (item.content_html) {
+        body.innerHTML = sanitizeHTML(item.content_html);
+      } else if (item.content_text) {
+        body.textContent = item.content_text;
+      } else {
+        body.textContent = 'No content available.';
+      }
 
-  currentItems = items;
-  renderList(items);
-  if (items[0]) openItem(items[0]);
-}
+      // Actions
+      const itemUrl = item._microfeed?.web_url || item.url || '#';
+      
+      $('#openOriginal').onclick = () => {
+        if (itemUrl !== '#') {
+          window.open(itemUrl, '_blank');
+        }
+      };
 
-// --- Download JSON ---
-$('#downloadJson').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(FEED, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'feed.json';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-});
+      $('#copyLink').onclick = async () => {
+        if (itemUrl === '#') return;
+        try {
+          await navigator.clipboard.writeText(itemUrl);
+          const btn = $('#copyLink');
+          const original = btn.textContent;
+          btn.textContent = '✓ Copied!';
+          setTimeout(() => btn.textContent = original, 2000);
+        } catch (e) {
+          prompt('Copy this link:', itemUrl);
+        }
+      };
+    };
 
-// ---------------- INIT AFTER LOAD ----------------
-function initFeed() {
-  renderFeedMeta(FEED);
-  currentItems = FEED.items ? [...FEED.items] : [];
-  applyFilters();
-}
+    // Back to list
+    $('#backButton').addEventListener('click', () => {
+      $('#detailView').classList.remove('active');
+      $('#listView').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
+    // Apply filters
+    const applyFilters = () => {
+      const query = $('#search').value.trim().toLowerCase();
+      const sortOrder = $('#sort').value;
+
+      let items = FEED?.items ? [...FEED.items] : [];
+
+      // Filter
+      if (query) {
+        items = items.filter(item =>
+          (item.title || '').toLowerCase().includes(query) ||
+          (item.content_text || '').toLowerCase().includes(query)
+        );
+      }
+
+      // Sort
+      items.sort((a, b) => {
+        const timeA = new Date(a.date_published || 0).getTime();
+        const timeB = new Date(b.date_published || 0).getTime();
+        return sortOrder === 'newest' ? timeB - timeA : timeA - timeB;
+      });
+
+      currentItems = items;
+      renderGrid(items);
+    };
+
+    // Event listeners
+    $('#search').addEventListener('input', applyFilters);
+    $('#sort').addEventListener('change', applyFilters);
+
+    $('#downloadJson').addEventListener('click', () => {
+      if (!FEED) return;
+      const blob = new Blob([JSON.stringify(FEED, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'feed.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // Initialize
+    const initFeed = () => {
+      renderFeedMeta(FEED);
+      currentItems = FEED?.items ? [...FEED.items] : [];
+      applyFilters();
+    };
+
+    // Load feed
+    getJSON('https://jewents.pages.dev/json/')
+      .then(data => {
+        FEED = data;
+        initFeed();
+      })
+      .catch(err => {
+        console.error('Error loading feed:', err);
+        $('#feedTitle').textContent = 'Error loading feed';
+        $('#feedDesc').textContent = 'Please check your connection';
+        $('#itemGrid').innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><p>Failed to load feed</p></div>';
+      });
   </script>
 </body>
 </html>
